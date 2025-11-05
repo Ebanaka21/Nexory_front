@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* index.css (или глобальные стили) */
+
+
+/* reset */
+html, body, #root {
+  height: 100%;
+  margin: 0;           /* важно — убирает белые полосы вокруг страницы */
+  background-color: var(--nexory-bg); /* задаём фон страницы, чтобы не просвечивала белая подложка */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* box sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}

@@ -1,8 +1,9 @@
-import { User } from "./types";
+// src/types/types.ts
 export interface User {
-  id: number;
-  username: string;
-  email: string;
+  id?: number;
+  name?: string;
+  username?: string;
+  email?: string;
 }
 
 export interface Message {

@@ -1,36 +1,70 @@
-import { useState } from "react";
+// src/main.tsx
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
-import Header from "./components/ui/Header";
-import Login from "./components/auth/Login";
-import Register from "./components/auth/Register";
-import Chat from "./components/chat/Chat";
-import './index.css';
+import "./index.css";
+import Header from "./app/ui/Header";
+import Footer from "./app/ui/Footer";
+import StartScreen from "./components/startscreen/StartScreen";
+import AuthModal from "./components/modal/Auth.Modal";
+import type { User } from "./types/types";
+import { checkAuth, logout } from "./utils/auth";
 
-
-export interface User {
-  username: string;
-}
-
-const App = () => {
+function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [authModal, setAuthModal] = useState<"login" | "register" | null>(null);
+
+  useEffect(() => {
+    checkAuth()
+      .then((u) => setUser(u))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+  };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-white">Загрузка…</div>;
+  }
 
   return (
-   <div className="min-h-screen bg-zinc-700 dark:bg-zinc-950 text-gray-100">
-  <Header user={user} onLogout={() => setUser(null)} />
+    <div className="min-h-screen bg-[#291A3D] text-white flex flex-col">
+      <Header
+        user={user}
+        onOpenLogin={() => setAuthModal("login")}
+        onOpenRegister={() => setAuthModal("register")}
+        onLogout={handleLogout}
+      />
 
-  <div className="container mx-auto p-6">
-    {!user ? (
-      <div className="flex flex-col md:flex-row gap-6">
-        <Register />
-        <Login onLogin={setUser} />
-      </div>
-    ) : (
-      <Chat serverId="1" user={user.username} />
-    )}
-  </div>
-</div>
+      {!user && (
+        <StartScreen
+          onOpenLogin={() => setAuthModal("login")}
+          onOpenRegister={() => setAuthModal("register")}
+        />
+      )}
+
+      {authModal && (
+        <AuthModal
+          onClose={() => setAuthModal(null)}
+          onSuccess={(u: User) => {
+            setUser(u);
+            setAuthModal(null);
+          }}
+          initialMode={authModal}
+        />
+      )}
+
+      {user && (
+        <div className="flex-1 flex items-center justify-center text-2xl">
+          Добро пожаловать, {user.username || user.name}!
+        </div>
+      )}
+
+      <Footer />
+    </div>
   );
-};
+}
 
-const root = ReactDOM.createRoot(document.getElementById("root")!);
-root.render(<App />);
+ReactDOM.createRoot(document.getElementById("root")!).render(<React.StrictMode><App /></React.StrictMode>);
